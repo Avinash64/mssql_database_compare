@@ -1,8 +1,5 @@
-USE master
 
-CREATE DATABASE testDB1;
 
-CREATE DATABASE testDB2;
 use testDB1;
 CREATE TABLE persons (  
      person_id int,  

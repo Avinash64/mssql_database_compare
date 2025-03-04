@@ -1,5 +1,5 @@
 import pyodbc
-
+from tablegen import gen_html, table
 # CONNECT TO SERVER
 
 SERVER = 'localhost, 1433'
@@ -10,28 +10,18 @@ PASSWORD = 'Thisisastrongpassword1!'
 connectionString = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={SERVER};DATABASE={DATABASE};UID={USERNAME};PWD={PASSWORD};TrustServerCertificate=yes;'
 conn = pyodbc.connect(connectionString)
 
-#create cursor
 cursor = conn.cursor()
+table_names = [x[2] for x in cursor.tables(tableType='TABLE') if 'trace' not in x[2]]
 
-
-
-table_names = [x[2] for x in cursor.tables(tableType='TABLE')]
+# print(table_names)
+data = []
 for i in table_names:
-    if 'trace' not in i:
-        print(i)
-        cursor.execute(f'SELECT * FROM {i}')
-        columns = [column for column in cursor.description]
-        print(columns)
-# print(table_names)  # ['customer', 'invoice', ...]
-
-with open('names.txt', encoding='utf-8') as f:
-    places = [place.strip() for place in f.readlines()]
-print(places)
-for i in places:
-    cursor.execute(f"INSERT INTO city VALUES ('{i}');")
-
-
-cursor.execute(f'SELECT * FROM city')
-print(cursor.fetchall())
+    cursor.execute(f'SELECT * from {i}')
+    records = cursor.fetchall()
+    data.append(table(records))
+    # print(records)
 cursor.close()
 conn.close()
+
+print(gen_html('index.html','\n\n'.join(data)))
+# print('\n\n'.join(data))
